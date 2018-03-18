@@ -1,0 +1,23 @@
+{
+  "name": "bamazon",
+  "version": "1.0.0",
+  "description": "bamazon storefront w/ Cust. view, Manager view, and Supervior view.",
+  "main": "bamazonCustomer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/noble0423/bamazon.git"
+  },
+  "author": "ryan noble",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/noble0423/bamazon/issues"
+  },
+  "homepage": "https://github.com/noble0423/bamazon#readme",
+  "dependencies": {
+    "inquirer": "^5.1.0",
+    "mysql": "^2.15.0"
+  }
+}
