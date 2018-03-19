@@ -71,14 +71,56 @@ function customerView() {
                     selectedItem = results[i];
                 }
             }
-            console.log("Selected Item ID: " + selectedItem.item_id);
-            console.log("Selected Item Name: " + selectedItem.product_name);
-            console.log("Selected QTY: " + response.qty);
+            var cartTotal = selectedItem.price * response.qty;
+            console.log("//////////////////////////////////////////////////////////////");
+            console.log("ORDER REVIEW (please review your order):");
+            console.log("Item ID: " + selectedItem.item_id);
+            console.log("Item Name: " + selectedItem.product_name);
+            console.log("Item price (each): $" + selectedItem.price);
+            console.log("QTY: " + response.qty);
+            console.log("Cart Total: $" + cartTotal);
+            console.log("//////////////////////////////////////////////////////////////");
             console.log("Checking availability...");
             // console.log("Quantity Avail: " + selectedItem.stock_qty);
             // if there is enough in stock, allow purchase
             if (response.qty <= selectedItem.stock_qty) {
                 console.log("There is enough in stock to complete your order.");
+                inquirer.prompt([
+                    {
+                        name: "placeOrder",
+                        type: "list",
+                        message: "Would you like to place your order?",
+                        choices: ["Yes", "No"]
+                    }
+                ]).then(function(answer) {
+                    if (answer.placeOrder === "Yes") {
+                        // Adjust inventory level accordingly, add total cost to the line item.
+                        var updatedQty = (selectedItem.stock_qty - response.qty);
+                        // console.log(updatedQty);
+                        connection.query(
+                            "UPDATE products SET ? WHERE ?",
+                            [
+                                {
+                                    stock_qty: updatedQty
+                                },
+                                {
+                                   item_id: selectedItem.item_id
+                                }
+                            ],
+                            function(err) {
+                                if (err) throw err;
+                                console.log("==============================================================");
+                                console.log("Order Completed. Thank you for Shopping with Bamazon!");
+                                console.log("==============================================================");
+                                customerView();
+                            }
+                        )
+                    }
+                    else {
+                        console.log("order cancelled");
+                        customerView();
+                    }
+                })
             }
             else {
                 console.log("Insufficient Quantity!");
