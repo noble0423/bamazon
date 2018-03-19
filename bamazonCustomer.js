@@ -40,20 +40,56 @@ function start() {
 };
 
 function customerView() {
-    inquirer
-        .prompt ([{
-            name: "item_id",
-            type: "input",
-            message: "Please enter the Item_ID for the product that you would like to order."
-        },
-        {
-            name: "qty",
-            type: "input",
-            message: "Please enter the quantity that you would like to order."
-        }]).then(function(response) {
-            console.log(response);
-            // if (response.item_id > 0 && response.item_id < 21 ) {
-            //     console.log("valid id entered");
-            // }
+    // query the database for all items being sold
+    connection.query("SELECT * FROM products", function(err, results) {
+        // console.log(results);
+        if (err) throw err;
+        // once you have the items, prompt the user for which they'd like to buy
+        inquirer.prompt([
+            {
+                name: "availProd",
+                type: "list",
+                choices: function() {
+                    var availProdArr = [];
+                    for (var i = 0; i < results.length; i++) {
+                        availProdArr.push(results[i].product_name);
+                    }
+                    return availProdArr;
+                },    
+                message: "Please select item."   
+            },
+            {
+                name: "qty",
+                type: "input",
+                message: "Please enter the quantity that you would like to order."
+            }
+        ]).then(function(response) {
+            // get the information RE the selected item and qty
+            var selectedItem;
+            for (var i = 0; i < results.length; i++) {
+                if (results[i].product_name === response.availProd) {
+                    selectedItem = results[i];
+                }
+            }
+            console.log("Selected Item ID: " + selectedItem.item_id);
+            console.log("Selected Item Name: " + selectedItem.product_name);
+            console.log("Selected QTY: " + response.qty);
+            console.log("Checking availability...");
+            // console.log("Quantity Avail: " + selectedItem.stock_qty);
+            // if there is enough in stock, allow purchase
+            if (response.qty <= selectedItem.stock_qty) {
+                console.log("There is enough in stock to complete your order.");
+            }
+            else {
+                console.log("Insufficient Quantity!");
+                console.log("Please re-enter your order for " + selectedItem.product_name + " in a qty at our below: " + selectedItem.stock_qty);
+                // ask user to re-enter qty under in stock amount?
+                customerView();
+            }
+            
+
+            
+            
         });
+    });
 }
