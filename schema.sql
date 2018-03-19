@@ -26,3 +26,25 @@ WHERE item_id = 9;
 UPDATE products
 SET stock_qty = 10
 WHERE item_id = 9;
+
+--adds qty_sold column to table
+ALTER TABLE products
+ADD qty_sold INTEGER
+AFTER stock_qty;
+
+--view products for sale (mgr view)
+SELECT item_id, product_name, price, stock_qty
+FROM products;
+
+--view low inventory (mgr view) --need to use an if stmt 1st (qty < 5)
+SELECT item_id, product_name, price, stock_qty
+FROM products;
+
+--add to inventory (mgr view) --values are based off of user input
+UPDATE products
+SET stock_qty = 200
+WHERE item_id = 20;
+
+--add new product (mgr view) --values are based off of user input
+INSERT INTO products
+SET product_name = "addedItem", department_name = "addedDept", price = 42.99, stock_qty = 100;

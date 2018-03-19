@@ -123,7 +123,7 @@ function customerView() {
                 })
             }
             else {
-                console.log("Insufficient Quantity!");
+                console.log("Insufficient Quantity Available!");
                 console.log("Please re-enter your order for " + selectedItem.product_name + " in a qty at our below: " + selectedItem.stock_qty);
                 // ask user to re-enter qty under in stock amount?
                 customerView();
