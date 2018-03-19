@@ -30,7 +30,7 @@ function start() {
             choices: ["Customer View", "Manager View", "Supervisor View"]
         }
     ]).then(function(answer) {
-            if (answer.view.toLowerCase() === "Customer View".toLowerCase()) {
+            if (answer.view === "Customer View") {
                 customerView();
                 console.log("cust view selected");
             }
@@ -148,6 +148,40 @@ function managerView() {
     ]).then(function(data) {
         console.log("Menu selected: " + data.menu);
         // if (data.menu === "Products for Sale")...display table of products for sale INCL (item_id, product_name, price, stock_qty)
+        if (data.menu === "Products for Sale") {
+            connection.query("SELECT item_id, product_name, price, stock_qty FROM products", function(err, results) {
+                if (err) throw err;
+                // console.log(results);
+                console.log("**************************************************************");
+                console.log("--------------------------------------------------------------");
+                for (var i = 0; i < results.length; i++) { 
+                    console.log("Item ID: " + results[i].item_id);
+                    console.log("Product Name: " + results[i].product_name);
+                    console.log("Price: " + results[i].price);
+                    console.log("Current Stock: " + results[i].stock_qty);
+                    console.log("--------------------------------------------------------------");
+                }
+                console.log("**************************************************************");
+            })
+        };
+        if (data.menu === "Low Inventory") {
+            connection.query("SELECT item_id, product_name, price, stock_qty FROM products", function(err, results) {
+                if (err) throw err;
+                console.log("**************************************************************");
+                console.log("--------------------------------------------------------------");
+                for (var i = 0; i < results.length; i++) {
+                    if (results[i].stock_qty < 5) {
+                        console.log("Item ID: " + results[i].item_id);
+                        console.log("Product Name: " + results[i].product_name);
+                        console.log("Price: " + results[i].price);
+                        console.log("Current Stock: " + results[i].stock_qty);
+                        console.log("--------------------------------------------------------------");
+                    }
+                }
+                console.log("All items are adequately stocked.");
+                console.log("**************************************************************");
+            })
+        };
         // if (data.menu === "Low Inventory")...If (stock_qty < 5)...(item_id, product_name, price, stock_qty)
         // if (data.menu === "Add Stock to Existing Inventory")...prompt avail products (similar to cust view), enter qty to add (similar to cust view), and update qty on that item
         // if (data.menu === "Add New Product")...INSERT item_id, product_name, department_name, price, stock_qty). 
