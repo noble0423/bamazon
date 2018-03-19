@@ -22,16 +22,21 @@ connection.connect(function(err) {
 });
 
 function start() {
-    inquirer    
-        .prompt ({
+    inquirer.prompt ([
+        {
             name: "view",
             type: "list",
             message: "Welcome to Bamazon. Please select a view from the following options:",
             choices: ["Customer View", "Manager View", "Supervisor View"]
-        }).then(function(answer) {
+        }
+    ]).then(function(answer) {
             if (answer.view.toLowerCase() === "Customer View".toLowerCase()) {
                 customerView();
                 console.log("cust view selected");
+            }
+            else if (answer.view === "Manager View") {
+                managerView();
+                console.log("Mgr View Selected");
             }
             else {
                 console.log("Sorry, this view is currently under construction.");
@@ -128,10 +133,23 @@ function customerView() {
                 // ask user to re-enter qty under in stock amount?
                 customerView();
             }
-            
-
-            
-            
         });
     });
-}
+};
+
+function managerView() {
+    inquirer.prompt ([
+        {
+            name: "menu",
+            type: "list",
+            message: "Please select one of the following menu options:",
+            choices: ["Products for Sale", "Low Inventory", "Add Stock to Existing Inventory", "Add New Product"]
+        }
+    ]).then(function(data) {
+        console.log("Menu selected: " + data.menu);
+        // if (data.menu === "Products for Sale")...display table of products for sale INCL (item_id, product_name, price, stock_qty)
+        // if (data.menu === "Low Inventory")...If (stock_qty < 5)...(item_id, product_name, price, stock_qty)
+        // if (data.menu === "Add Stock to Existing Inventory")...prompt avail products (similar to cust view), enter qty to add (similar to cust view), and update qty on that item
+        // if (data.menu === "Add New Product")...INSERT item_id, product_name, department_name, price, stock_qty). 
+    })
+};
