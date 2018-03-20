@@ -32,11 +32,11 @@ function start() {
     ]).then(function(answer) {
             if (answer.view === "Customer View") {
                 customerView();
-                console.log("cust view selected");
+                // console.log("cust view selected");
             }
             else if (answer.view === "Manager View") {
                 managerView();
-                console.log("Mgr View Selected");
+                // console.log("Mgr View Selected");
             }
             else {
                 console.log("Sorry, this view is currently under construction.");
@@ -45,6 +45,24 @@ function start() {
 };
 
 function customerView() {
+    inquirer.prompt([
+        {
+            name: "placeOrder",
+            type: "list",
+            choices: ["Place an Order", "Exit\n"],
+            message: "---CUSTOMER VIEW---\nWould you like to place an order with Bamazon? Select [Place an Order] to view available products for sale, or [Exit] to exit."
+        }
+    ]).then(function(res) {
+        if (res.placeOrder === "Place an Order") {
+            placeOrder();
+        }
+        else {
+            start();
+        }
+    })
+};
+
+function placeOrder() {
     // query the database for all items being sold
     connection.query("SELECT * FROM products", function(err, results) {
         // console.log(results);
@@ -115,7 +133,7 @@ function customerView() {
                             function(err) {
                                 if (err) throw err;
                                 console.log("==============================================================");
-                                console.log("Order Completed. Thank you for Shopping with Bamazon!");
+                                console.log("   Order Completed. Thank you for Shopping with Bamazon!");
                                 console.log("==============================================================");
                                 customerView();
                             }
@@ -134,7 +152,7 @@ function customerView() {
                 customerView();
             }
         });
-    });
+    });    
 };
 
 function managerView() {
@@ -142,48 +160,70 @@ function managerView() {
         {
             name: "menu",
             type: "list",
-            message: "Please select one of the following menu options:",
-            choices: ["Products for Sale", "Low Inventory", "Add Stock to Existing Inventory", "Add New Product"]
+            message: "---MANAGER VIEW---\nPlease select one of the following menu options:",
+            choices: ["Products for Sale", "Low Inventory", "Add Stock to Existing Inventory", "Add New Product", "Exit"]
         }
     ]).then(function(data) {
-        console.log("Menu selected: " + data.menu);
-        // if (data.menu === "Products for Sale")...display table of products for sale INCL (item_id, product_name, price, stock_qty)
+        console.log("---" + data.menu + " Menu---");
+        // if (data.menu === "Products for Sale")...display table of all products for sale INCL (item_id, product_name, price, stock_qty)
         if (data.menu === "Products for Sale") {
-            connection.query("SELECT item_id, product_name, price, stock_qty FROM products", function(err, results) {
-                if (err) throw err;
-                // console.log(results);
-                console.log("**************************************************************");
-                console.log("--------------------------------------------------------------");
-                for (var i = 0; i < results.length; i++) { 
-                    console.log("Item ID: " + results[i].item_id);
-                    console.log("Product Name: " + results[i].product_name);
-                    console.log("Price: " + results[i].price);
-                    console.log("Current Stock: " + results[i].stock_qty);
-                    console.log("--------------------------------------------------------------");
-                }
-                console.log("**************************************************************");
-            })
-        };
+            availForSale();
+        }
+        // if (data.menu === "Low Inventory")...If (stock_qty < 5)...display list of low inventory items (item_id, product_name, price, stock_qty)
         if (data.menu === "Low Inventory") {
-            connection.query("SELECT item_id, product_name, price, stock_qty FROM products", function(err, results) {
-                if (err) throw err;
-                console.log("**************************************************************");
-                console.log("--------------------------------------------------------------");
-                for (var i = 0; i < results.length; i++) {
-                    if (results[i].stock_qty < 5) {
-                        console.log("Item ID: " + results[i].item_id);
-                        console.log("Product Name: " + results[i].product_name);
-                        console.log("Price: " + results[i].price);
-                        console.log("Current Stock: " + results[i].stock_qty);
-                        console.log("--------------------------------------------------------------");
-                    }
-                }
-                console.log("All items are adequately stocked.");
-                console.log("**************************************************************");
-            })
-        };
-        // if (data.menu === "Low Inventory")...If (stock_qty < 5)...(item_id, product_name, price, stock_qty)
+            lowInventory();
+        }
         // if (data.menu === "Add Stock to Existing Inventory")...prompt avail products (similar to cust view), enter qty to add (similar to cust view), and update qty on that item
+        if (data.menu === "Add Stock to Existing Inventory") {
+            console.log("under construction");
+        }
         // if (data.menu === "Add New Product")...INSERT item_id, product_name, department_name, price, stock_qty). 
+        if (data.menu === "Add New Product") {
+            console.log("under construction");
+        }
+        // if exit, exit (run start function);
+        if (data.menu === "Exit") {
+            start();
+        }
+    })
+};
+
+function availForSale() {
+    connection.query("SELECT item_id, product_name, price, stock_qty FROM products", function(err, results) {
+        if (err) throw err;
+        // console.log(results);
+        console.log("**************************************************************");
+        console.log("--------------------------------------------------------------");
+        for (var i = 0; i < results.length; i++) { 
+            console.log("Item ID: " + results[i].item_id);
+            console.log("Product Name: " + results[i].product_name);
+            console.log("Price: " + results[i].price);
+            console.log("Current Stock: " + results[i].stock_qty);
+            console.log("--------------------------------------------------------------");
+        }
+        console.log("**************************************************************");
+        console.log("              END OF AVAILABLE PRODUCTS LIST");
+        console.log("**************************************************************");
+        managerView(); 
+    })
+};
+
+function lowInventory() {
+    connection.query("SELECT item_id, product_name, price, stock_qty FROM products", function(err, results) {
+        if (err) throw err;
+        console.log("**************************************************************");
+        console.log("--------------------------------------------------------------");
+        for (var i = 0; i < results.length; i++) {
+            if (results[i].stock_qty < 5) {
+                console.log("Item ID: " + results[i].item_id);
+                console.log("Product Name: " + results[i].product_name);
+                console.log("Price: " + results[i].price);
+                console.log("Current Stock: " + results[i].stock_qty);
+                console.log("--------------------------------------------------------------");
+            }
+        }
+        console.log("All items are adequately stocked.");
+        console.log("**************************************************************");
+        managerView();
     })
 };
