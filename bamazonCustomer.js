@@ -118,7 +118,7 @@ function placeOrder() {
                 ]).then(function(answer) {
                     if (answer.placeOrder === "Yes") {
                         // Adjust inventory level accordingly, add total cost to the line item.
-                        var updatedQty = (selectedItem.stock_qty - response.qty);
+                        var updatedQty = parseInt(selectedItem.stock_qty) - parseInt(response.qty);
                         // console.log(updatedQty);
                         connection.query(
                             "UPDATE products SET ? WHERE ?",
@@ -127,7 +127,7 @@ function placeOrder() {
                                     stock_qty: updatedQty
                                 },
                                 {
-                                   item_id: selectedItem.item_id
+                                    item_id: selectedItem.item_id
                                 }
                             ],
                             function(err) {
@@ -140,7 +140,7 @@ function placeOrder() {
                         )
                     }
                     else {
-                        console.log("order cancelled");
+                        console.log("Order Cancelled");
                         customerView();
                     }
                 })
@@ -165,19 +165,19 @@ function managerView() {
         }
     ]).then(function(data) {
         console.log("---" + data.menu + " Menu---");
-        // if (data.menu === "Products for Sale")...display table of all products for sale INCL (item_id, product_name, price, stock_qty)
+        // If "Products for Sale", run availForSale function
         if (data.menu === "Products for Sale") {
             availForSale();
         }
-        // if (data.menu === "Low Inventory")...If (stock_qty < 5)...display list of low inventory items (item_id, product_name, price, stock_qty)
+        // If "Low Inventory", run lowInventory function
         if (data.menu === "Low Inventory") {
             lowInventory();
         }
-        // if (data.menu === "Add Stock to Existing Inventory")...prompt avail products (similar to cust view), enter qty to add (similar to cust view), and update qty on that item
+        // If "Add Stock to Existing Inventory", run addToExistingInv function
         if (data.menu === "Add Stock to Existing Inventory") {
-            console.log("under construction");
+            addToExistingInv();
         }
-        // if (data.menu === "Add New Product")...INSERT item_id, product_name, department_name, price, stock_qty). 
+        // If "Add New Product", run addNewProduct function
         if (data.menu === "Add New Product") {
             console.log("under construction");
         }
@@ -188,6 +188,7 @@ function managerView() {
     })
 };
 
+// if (data.menu === "Products for Sale")...display table of all products for sale INCL (item_id, product_name, price, stock_qty)
 function availForSale() {
     connection.query("SELECT item_id, product_name, price, stock_qty FROM products", function(err, results) {
         if (err) throw err;
@@ -208,6 +209,7 @@ function availForSale() {
     })
 };
 
+// if (data.menu === "Low Inventory")...If (stock_qty < 5)...display list of low inventory items (item_id, product_name, price, stock_qty)
 function lowInventory() {
     connection.query("SELECT item_id, product_name, price, stock_qty FROM products", function(err, results) {
         if (err) throw err;
@@ -224,6 +226,92 @@ function lowInventory() {
         }
         console.log("All items are adequately stocked.");
         console.log("**************************************************************");
+        console.log("              END OF LOW INVENTORY LIST");
+        console.log("**************************************************************");
         managerView();
     })
+};
+
+// if (data.menu === "Add Stock to Existing Inventory")...prompt avail products (similar to cust view), enter qty to add (similar to cust view), and update qty on that item
+function addToExistingInv() {
+    connection.query("SELECT * FROM products", function(err, results) {
+        if (err) throw err;
+        inquirer.prompt([
+            {
+                name: "currentInventory",
+                type: "list",
+                choices: function() {
+                    var currentInvArr = [];
+                    for (var i = 0; i < results.length; i++) {
+                        currentInvArr.push(results[i].product_name);
+                    }
+                    return currentInvArr;
+                },
+                message: "Please select Inventory Item to add quantity to."
+            },
+            {
+                name: "addQTY",
+                type: "input",
+                message: "Enter QTY to add to inventory."
+            }
+        ]).then(function(resp) {
+            var selectedInvItem;
+            for (var i = 0; i < results.length; i++) {
+                if (results[i].product_name === resp.currentInventory) {
+                    selectedInvItem = results[i];
+
+                    // variable for new stock amount
+                    var newQty = parseInt(selectedInvItem.stock_qty) + parseInt(resp.addQTY);
+
+                    console.log("###############################################################");
+                    console.log("Product Name: " + selectedInvItem.product_name);
+                    console.log("Item ID:" + selectedInvItem.item_id);
+                    console.log("Previous Stock QTY: " + selectedInvItem.stock_qty);
+                    console.log("QTY to add to Existing Inventory: " + resp.addQTY);
+                    console.log("Updated Inventory Total: " + newQty);
+                    console.log("###############################################################");
+                    
+                    inquirer.prompt([
+                        {
+                           name: "confirmStockUpdate",
+                           type: "list",
+                           message: "Are you sure you want to update inventory accordingly?",
+                           choices: ["Yes", "No"] 
+                        }
+                    ]).then(function(ans) {
+                        if (ans.confirmStockUpdate === "Yes") {
+                            console.log(newQty);
+                            connection.query(
+                                "UPDATE products SET ? WHERE ?", 
+                                [
+                                    {
+                                        stock_qty: newQty
+                                    },
+                                    {
+                                        item_id: selectedInvItem.item_id
+                                    }
+                                ],
+                                function(err) {
+                                    if (err) throw err;
+                                    console.log("==============================================================");
+                                    console.log("              INVENTORY UPDATE COMPLETED");
+                                    console.log("==============================================================");
+                                    managerView();
+                                }
+                            )
+                        }
+                        else {
+                            console.log("Inventory Adjustment Cancelled");
+                            managerView();
+                        }
+                    })
+                }
+            }
+        });
+    });
+};
+
+// if (data.menu === "Add New Product")...INSERT item_id, product_name, department_name, price, stock_qty). 
+function addNewProduct() {
+
 };
