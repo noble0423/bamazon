@@ -18,7 +18,7 @@
   "homepage": "https://github.com/noble0423/bamazon#readme",
   "dependencies": {
     "inquirer": "^5.1.0",
-    "lodash": "^4.17.14",
+    "lodash": "^4.17.19",
     "mysql": "^2.15.0"
   }
 }
